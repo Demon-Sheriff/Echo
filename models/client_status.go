@@ -1,9 +1,9 @@
 package models
 
-type UserSTATUS int
+type ClientSTATUS int
 
 const (
-	Idle UserSTATUS = iota
+	Idle ClientSTATUS = iota
 	client
 	server
 	Both
