@@ -1,6 +1,6 @@
 package models
 
 type ChatInterface struct {
-	room_id  int
-	messages []Message
+	Room_id  int
+	Messages []Message
 }

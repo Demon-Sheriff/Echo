@@ -2,7 +2,7 @@ package models
 
 type ReplyMessage struct {
 	Message
-	reply_message_id int
-	reply_text       string
-	reply_sender     User
+	Reply_message_id int
+	Reply_text       string
+	Reply_sender     Client
 }
