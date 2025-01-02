@@ -7,3 +7,9 @@
 #### Class Design
 ![image](https://github.com/user-attachments/assets/cd11c811-7ce4-4772-bb3a-26848bf6f3fc)
 
+
+---
+#### Multi-client-server architecture
+![image](https://github.com/user-attachments/assets/a061b71f-55c8-426f-8f05-c3f8486f0bb8)
+
+
