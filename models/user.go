@@ -1,8 +1,8 @@
 package models
 
 type User struct {
-	user_id   int
-	user_name string
-	rooms     []Room
-	status    UserSTATUS
+	User_id   int
+	User_name string
+	Rooms     []Room
+	Status    UserSTATUS
 }

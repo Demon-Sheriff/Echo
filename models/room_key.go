@@ -1,7 +1,7 @@
 package models
 
 type RoomKey struct {
-	room_key string
-	port     int
-	subnet   [4]byte
+	Room_key string
+	Port     int
+	Subnet   [4]byte
 }

@@ -4,7 +4,7 @@ type UserSTATUS int
 
 const (
 	Idle UserSTATUS = iota
-	Client
-	Server
+	client
+	server
 	Both
 )
