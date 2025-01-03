@@ -1,8 +1,10 @@
 package models
 
 import (
+	"bufio"
 	"fmt"
 	"net"
+	"os"
 	"sync"
 )
 
@@ -84,16 +86,54 @@ func (client *Client) connectToServer(server *Server) (net.Conn, error) {
 		fmt.Printf("error connecting to server %v", err)
 	}
 
+	fmt.Printf("connected to server")
 	return conn, err
 	// defer conn.Close()
 }
 
-func (client *Client) SendMessage() {
+// send the message to the specified server
+func (client *Client) SendMessage(conn net.Conn, done chan bool) {
 
+	scanner := bufio.NewScanner(os.Stdin)
+
+	for {
+
+		// enter the input
+		fmt.Println("Enter message")
+		if !scanner.Scan() {
+			fmt.Println("Input error or EOF")
+			done <- true
+			return
+		}
+
+		message := scanner.Text() + "\n"
+
+		// send message to the server
+		_, err := conn.Write([]byte(message))
+
+		if err != nil {
+			fmt.Println("error sending data : ", err)
+			done <- true
+			return 
+		}
+	}
 }
 
-func (client *Client) RecvMessage() {
-	
+func (client *Client) RecvMessage(conn net.Conn, done chan bool) {
+
+	// create a reader for the established connection 
+	reader := bufio.NewReader(conn)
+	// listen for messages continously
+	for {
+		message, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println("disconnected from the server")
+			done <- true
+			return 
+		}
+
+		fmt.Println("server : " + message)
+	}
 }
 
 // this is our client
