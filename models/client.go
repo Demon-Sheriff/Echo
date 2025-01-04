@@ -1,6 +1,8 @@
 package models
 
 import (
+	"bufio"
+	"encoding/json"
 	"fmt"
 	"net"
 	"sync"
@@ -11,7 +13,7 @@ type ServerMap struct {
 	servers map[string]net.Conn // map a room key -> server's Conn object (models.Room)
 }
 
-func (sM *ServerMap) AddServer(room_key string, serverConn net.Conn) {
+func (sM *ServerMap) AddServer(room_key string, conn net.Conn) {
 
 	sM.mu.Lock()
 	defer sM.mu.Unlock()
@@ -21,7 +23,7 @@ func (sM *ServerMap) AddServer(room_key string, serverConn net.Conn) {
 		return
 	}
 
-	sM.servers[room_key] = serverConn
+	sM.servers[room_key] = conn
 	fmt.Printf("connected with room having room_key = %v\n", room_key)
 }
 
@@ -67,10 +69,13 @@ func (client *Client) ConnectToNewServer(roomKey RoomKey) {
 	}
 
 	// establish connection with the new server
-	serverConn, _ := client.connectToServer(&server)
+	conn, _ := client.connectToServer(&server)
+
+	// send message to server to give info like username
+	client.SendMessage(conn, &Message{Text: client.Client_name})
 
 	// add the new server to the map.
-	client.ServerMap.AddServer(room_key, serverConn)
+	client.ServerMap.AddServer(room_key, conn)
 }
 
 // only responsibility is to connect to the given server.
@@ -88,24 +93,35 @@ func (client *Client) connectToServer(server *Server) (net.Conn, error) {
 	// defer conn.Close()
 }
 
-func (client *Client) SendMessage(serverConn net.Conn, message *Message) {
+func (client *Client) SendMessage(conn net.Conn, message *Message) {
 
-	_, err := serverConn.Write([]byte(message.Text))
+	jsonData, err := json.Marshal(message)
+	if err != nil {
+		fmt.Println("Error encoding JSON:", err)
+		return
+	}
+
+	_, err = conn.Write([]byte(jsonData))
 	if err != nil {
 		fmt.Printf("Error writing to to server %v", err)
+		return
 	}
 }
 
-func (client *Client) RecvMessage(serverConn net.Conn) {
+func (client *Client) RecvMessage(conn net.Conn, done chan bool) {
 
-	msgBuffer := make([]byte, 1024)
+	// create a reader for the established connection
+	reader := bufio.NewReader(conn)
+	// listen for messages continously
 	for {
-		n, err := serverConn.Read(msgBuffer)
+		message, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Printf("Error while reading from server %v", err)
+			fmt.Println("disconnected from the server")
+			done <- true
 			return
 		}
-		fmt.Printf("Message Recieved %v", msgBuffer[:n])
+
+		fmt.Println("server : " + message)
 	}
 }
 
